@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>WayToCol.Estate.Service.Public</name>
+    </assembly>
+    <members>
+        <member name="T:WayToCol.Estate.Service.Public.Controllers.EstateController">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:WayToCol.Estate.Service.Public.Controllers.EstateController.#ctor(Microsoft.Extensions.Logging.ILogger{WayToCol.Estate.Service.Public.Controllers.EstateController},WayToCol.Estate.Service.Public.Repository.IEstatePublicRepository)">
+            <summary>
+            
+            </summary>
+            <param name="logger"></param>
+            <param name="rep"></param>
+        </member>
+        <member name="M:WayToCol.Estate.Service.Public.Controllers.EstateController.Get(System.Int32,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="page"></param>
+            <param name="pagesize"></param>
+            <returns></returns>
+        </member>
+        <member name="T:WayToCol.Estate.Service.Public.Extensions">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:WayToCol.Estate.Service.Public.Extensions.AddContracts(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            
+            </summary>
+            <param name="services"></param>
+            <returns></returns>
+        </member>
+        <member name="T:WayToCol.Estate.Service.Public.Program">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:WayToCol.Estate.Service.Public.Program.Main(System.String[])">
+            <summary>
+            
+            </summary>
+            <param name="args"></param>
+        </member>
+        <member name="M:WayToCol.Estate.Service.Public.Program.CreateWebHostBuilder(System.String[])">
+            <summary>
+            
+            </summary>
+            <param name="args"></param>
+            <returns></returns>
+        </member>
+        <member name="T:WayToCol.Estate.Service.Public.Repository.EstatePublicMongoDbRepository">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:WayToCol.Estate.Service.Public.Repository.EstatePublicMongoDbRepository.#ctor(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            
+            </summary>
+            <param name="config"></param>
+        </member>
+        <member name="M:WayToCol.Estate.Service.Public.Repository.EstatePublicMongoDbRepository.GetPaginated(System.Int32,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="page"></param>
+            <param name="pagesize"></param>
+            <returns></returns>
+        </member>
+        <member name="T:WayToCol.Estate.Service.Public.Repository.IEstatePublicRepository">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:WayToCol.Estate.Service.Public.Repository.IEstatePublicRepository.GetPaginated(System.Int32,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="page"></param>
+            <param name="pagesize"></param>
+            <returns></returns>
+        </member>
+        <member name="T:WayToCol.Estate.Service.Public.Startup">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:WayToCol.Estate.Service.Public.Startup.#ctor(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            
+            </summary>
+            <param name="configuration"></param>
+        </member>
+        <member name="P:WayToCol.Estate.Service.Public.Startup._configuration">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:WayToCol.Estate.Service.Public.Startup.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            This method gets called by the runtime. Use this method to add services to the container.
+        </member>
+        <member name="M:WayToCol.Estate.Service.Public.Startup.Configure(Microsoft.AspNetCore.Builder.IApplicationBuilder,Microsoft.AspNetCore.Hosting.IHostingEnvironment)">
+            <summary>
+            
+            </summary>
+            <param name="app"></param>
+            <param name="env"></param>
+        </member>
+        <member name="M:WayToCol.Estate.Service.Public.Startup.ConfigureMappings">
+            <summary>
+            
+            </summary>
+        </member>
+    </members>
+</doc>
