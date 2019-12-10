@@ -68,10 +68,11 @@ namespace WayToCol.Estate.Service.Public.Controllers
         /// Get id files from estate
         /// </summary>
         /// <returns></returns>
+        /// <example>0c269a6461d9de85b0510966eae9837c</example>
         // https://docs.microsoft.com/es-es/aspnet/core/fundamentals/routing?view=aspnetcore-2.1#route-template-reference
         [HttpGet]
         [Route("{idestate}/files")]
-        public IActionResult Get(string idestate)
+        public IActionResult GetFilesByIdEstate(string idestate)
         {
             try
             {
@@ -81,6 +82,34 @@ namespace WayToCol.Estate.Service.Public.Controllers
                 if (listFiles == null || listFiles.Count()==0)
                     return StatusCode(StatusCodes.Status204NoContent);
                 return StatusCode(StatusCodes.Status200OK, listFiles);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al hacer Get FileEstate");
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+
+        }
+
+
+        /// <summary>
+        /// Get estate details
+        /// </summary>
+        /// <param name="idestate">
+        /// Id of an estate, for example, fdd0804601659077ea8ab4f8970a4c97
+        /// </param>
+        /// <returns></returns>
+        // https://docs.microsoft.com/es-es/aspnet/core/fundamentals/routing?view=aspnetcore-2.1#route-template-reference
+        [HttpGet]
+        [Route("{idestate}")]
+        public IActionResult GetEstate(string idestate)
+        {
+            try
+            {
+                var estate = _rep.Single(x => idestate == x.idMD5);
+                if (estate == null)
+                    return StatusCode(StatusCodes.Status500InternalServerError);
+                return StatusCode(StatusCodes.Status200OK, estate);
             }
             catch (Exception ex)
             {

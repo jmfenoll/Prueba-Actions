@@ -45,7 +45,7 @@ namespace WayToCol.Estate.Service.Public
 
             services.AddSwagger(new Info
             {
-                Title = "EstateFile service Public",
+                Title = "Estate service Public",
                 Version = "v1",
                 Description = "",
                 TermsOfService = "None"

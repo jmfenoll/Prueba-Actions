@@ -24,10 +24,20 @@
             <param name="pagesize">Items by page</param>
             <returns></returns>
         </member>
-        <member name="M:WayToCol.Estate.Service.Public.Controllers.EstateController.Get(System.String)">
+        <member name="M:WayToCol.Estate.Service.Public.Controllers.EstateController.GetFilesByIdEstate(System.String)">
             <summary>
             Get id files from estate
             </summary>
+            <returns></returns>
+            <example>0c269a6461d9de85b0510966eae9837c</example>
+        </member>
+        <member name="M:WayToCol.Estate.Service.Public.Controllers.EstateController.GetEstate(System.String)">
+            <summary>
+            Get estate details
+            </summary>
+            <param name="idestate">
+            Id of an estate, for example, fdd0804601659077ea8ab4f8970a4c97
+            </param>
             <returns></returns>
         </member>
         <member name="T:WayToCol.Estate.Service.Public.Extensions">
