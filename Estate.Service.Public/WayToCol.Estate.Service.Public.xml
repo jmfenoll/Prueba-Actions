@@ -18,10 +18,16 @@
         </member>
         <member name="M:WayToCol.Estate.Service.Public.Controllers.EstateController.Get(System.Int32,System.Int32)">
             <summary>
-            
+            Get list of estates paginated
             </summary>
-            <param name="page"></param>
-            <param name="pagesize"></param>
+            <param name="page">Number of page</param>
+            <param name="pagesize">Items by page</param>
+            <returns></returns>
+        </member>
+        <member name="M:WayToCol.Estate.Service.Public.Controllers.EstateController.Get(System.String)">
+            <summary>
+            Get id files from estate
+            </summary>
             <returns></returns>
         </member>
         <member name="T:WayToCol.Estate.Service.Public.Extensions">
@@ -116,6 +122,36 @@
             <summary>
             
             </summary>
+        </member>
+        <member name="T:WayToCol.EstateFile.Service.Public.Repository.EstateFilePublicMongoDbRepository">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:WayToCol.EstateFile.Service.Public.Repository.EstateFilePublicMongoDbRepository.#ctor(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            
+            </summary>
+            <param name="config"></param>
+        </member>
+        <member name="M:WayToCol.EstateFile.Service.Public.Repository.EstateFilePublicMongoDbRepository.GetByIdEstate(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="idEstate"></param>
+            <returns></returns>
+        </member>
+        <member name="T:WayToCol.EstateFile.Service.Public.Repository.IEstateFilePublicRepository">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:WayToCol.EstateFile.Service.Public.Repository.IEstateFilePublicRepository.GetByIdEstate(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="idEstate"></param>
+            <returns></returns>
         </member>
     </members>
 </doc>

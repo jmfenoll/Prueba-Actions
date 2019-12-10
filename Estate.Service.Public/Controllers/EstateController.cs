@@ -5,10 +5,11 @@ using System.Web.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using WayToCol.Common.Contracts;
 using WayToCol.Common.Contracts.Estates;
 using WayToCol.Estate.Service.Public.Repository;
-
+using WayToCol.EstateFile.Service.Public.Repository;
 
 namespace WayToCol.Estate.Service.Public.Controllers
 {
@@ -58,6 +59,32 @@ namespace WayToCol.Estate.Service.Public.Controllers
             }
             catch (Exception ex)
             {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+
+        }
+
+        /// <summary>
+        /// Get id files from estate
+        /// </summary>
+        /// <returns></returns>
+        // https://docs.microsoft.com/es-es/aspnet/core/fundamentals/routing?view=aspnetcore-2.1#route-template-reference
+        [HttpGet]
+        [Route("{idestate}/files")]
+        public IActionResult Get(string idestate)
+        {
+            try
+            {
+                var _repFile = (IEstateFilePublicRepository) HttpContext.RequestServices.GetService(typeof(IEstateFilePublicRepository));
+
+                var listFiles= _repFile.GetByIdEstate(idestate);
+                if (listFiles == null || listFiles.Count()==0)
+                    return StatusCode(StatusCodes.Status204NoContent);
+                return StatusCode(StatusCodes.Status200OK, listFiles);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al hacer Get FileEstate");
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
 

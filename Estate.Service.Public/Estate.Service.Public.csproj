@@ -18,6 +18,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\EstateFile.Service.Public\EstateFile.Service.Public\Repository\EstateFilePublicMongoDbRepository.cs" Link="Repository\EstateFilePublicMongoDbRepository.cs" />
+    <Compile Include="..\..\EstateFile.Service.Public\EstateFile.Service.Public\Repository\IEstateFilePublicRepository.cs" Link="Repository\IEstateFilePublicRepository.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Models\" />
     <Folder Include="Properties\" />
     <Folder Include="wwwroot\" />
