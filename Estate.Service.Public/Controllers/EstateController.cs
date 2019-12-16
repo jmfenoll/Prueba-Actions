@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Serilog;
 using WayToCol.Common.Contracts;
 using WayToCol.Common.Contracts.Estates;
@@ -56,6 +58,30 @@ namespace WayToCol.Estate.Service.Public.Controllers
                 if (response.Data == null)
                     return StatusCode(StatusCodes.Status500InternalServerError);
                 return StatusCode(StatusCodes.Status200OK, response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+
+        }
+
+        [HttpGet]
+        [Route("auth")]
+        public IActionResult Authenticate([FromQuery] string user, [FromQuery] string pass)
+        {
+            try
+            {
+                if (user == "123" && pass == "123")
+                {
+                    dynamic resp = new ExpandoObject();
+                    resp.token = Guid.NewGuid();
+                    resp.valid = DateTime.Now.AddDays(1);
+                    var strJson = JsonConvert.SerializeObject(resp);
+                    return StatusCode(StatusCodes.Status200OK, strJson);
+                }
+                else
+                    return StatusCode(StatusCodes.Status401Unauthorized);
             }
             catch (Exception ex)
             {

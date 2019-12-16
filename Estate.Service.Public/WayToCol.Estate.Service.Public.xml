@@ -133,35 +133,5 @@
             
             </summary>
         </member>
-        <member name="T:WayToCol.EstateFile.Service.Public.Repository.EstateFilePublicMongoDbRepository">
-            <summary>
-            
-            </summary>
-        </member>
-        <member name="M:WayToCol.EstateFile.Service.Public.Repository.EstateFilePublicMongoDbRepository.#ctor(Microsoft.Extensions.Configuration.IConfiguration)">
-            <summary>
-            
-            </summary>
-            <param name="config"></param>
-        </member>
-        <member name="M:WayToCol.EstateFile.Service.Public.Repository.EstateFilePublicMongoDbRepository.GetByIdEstate(System.String)">
-            <summary>
-            
-            </summary>
-            <param name="idEstate"></param>
-            <returns></returns>
-        </member>
-        <member name="T:WayToCol.EstateFile.Service.Public.Repository.IEstateFilePublicRepository">
-            <summary>
-            
-            </summary>
-        </member>
-        <member name="M:WayToCol.EstateFile.Service.Public.Repository.IEstateFilePublicRepository.GetByIdEstate(System.String)">
-            <summary>
-            
-            </summary>
-            <param name="idEstate"></param>
-            <returns></returns>
-        </member>
     </members>
 </doc>
