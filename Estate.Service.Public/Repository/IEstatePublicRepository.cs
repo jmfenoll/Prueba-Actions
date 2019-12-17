@@ -7,7 +7,7 @@ namespace WayToCol.Estate.Service.Public.Repository
     /// <summary>
     /// 
     /// </summary>
-    public interface IEstatePublicRepository : IPublicRepository<propiedadesPropiedad>
+    public interface IEstatePublicRepository : IPublicRepository<EstateDto>
     {
         /// <summary>
         /// 
@@ -15,7 +15,7 @@ namespace WayToCol.Estate.Service.Public.Repository
         /// <param name="page"></param>
         /// <param name="pagesize"></param>
         /// <returns></returns>
-        Common.Contracts.PaginationModel<propiedadesPropiedad> GetPaginated(int page, int pagesize);
+        Common.Contracts.PaginationModel<EstateDto> GetPaginated(int page, int pagesize);
     }
 
 

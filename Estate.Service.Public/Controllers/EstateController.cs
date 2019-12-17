@@ -132,7 +132,7 @@ namespace WayToCol.Estate.Service.Public.Controllers
         {
             try
             {
-                var estate = _rep.Single(x => idestate == x.idMD5);
+                var estate = _rep.Single(x => idestate == x.id);
                 if (estate == null)
                     return StatusCode(StatusCodes.Status500InternalServerError);
                 return StatusCode(StatusCodes.Status200OK, estate);

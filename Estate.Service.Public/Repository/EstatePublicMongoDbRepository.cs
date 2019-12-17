@@ -10,7 +10,7 @@ namespace WayToCol.Estate.Service.Public.Repository
     /// <summary>
     /// 
     /// </summary>
-    public class EstatePublicMongoDbRepository : MongoDbPublicRepository<propiedadesPropiedad>, IEstatePublicRepository
+    public class EstatePublicMongoDbRepository : MongoDbPublicRepository<EstateDto>, IEstatePublicRepository
     {
         /// <summary>
         /// 
@@ -26,8 +26,8 @@ namespace WayToCol.Estate.Service.Public.Repository
         /// <param name="page"></param>
         /// <param name="pagesize"></param>
         /// <returns></returns>
-        public PaginationModel<propiedadesPropiedad> GetPaginated(int page, int pagesize) {
-                var pag = new PaginationModel<propiedadesPropiedad>();
+        public PaginationModel<EstateDto> GetPaginated(int page, int pagesize) {
+                var pag = new PaginationModel<EstateDto>();
                 var resp = this.All().Skip((page - 1) * pagesize).Take(pagesize).ToList();
 
                 if (resp == null)

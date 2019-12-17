@@ -33,8 +33,8 @@
     <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
     <PackageReference Include="WayToCol.Common.Api" Version="1.0.0" />
-    <PackageReference Include="WayToCol.Common.Contracts" Version="2019.12.7.2336" />
-    <PackageReference Include="WayToCol.Common.MongoDbRepository" Version="2019.12.15.2114" />
+    <PackageReference Include="WayToCol.Common.Contracts" Version="2019.12.17.106" />
+    <PackageReference Include="WayToCol.Common.MongoDbRepository" Version="2019.12.17.109" />
   </ItemGroup>
 
   <ItemGroup>
