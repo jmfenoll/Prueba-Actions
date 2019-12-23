@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization;
 using Swashbuckle.AspNetCore.Swagger;
+using WayToCol.Common.Api;
 using WayToCol.Common.Api.Swagger;
 using WayToCol.Common.Contracts.Estates;
 
@@ -49,10 +50,11 @@ namespace WayToCol.Estate.Service.Public
                 Version = "v1",
                 Description = "",
                 TermsOfService = "None"
-            }, _projectName);
+            }, _projectName, _configuration["oauth:tokenUrl"]);
 
             services.AddContracts();
 
+            services.AddCustomAuthentication(_configuration["oauth:host"]);
         }
 
         /// <summary>
@@ -76,6 +78,8 @@ namespace WayToCol.Estate.Service.Public
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 //app.UseHsts();
             }
+
+            app.UseAuthentication();
 
             app.UseMvc();
 

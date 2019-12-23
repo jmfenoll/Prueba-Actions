@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>E:\DATOS\REPOS\WayToCol\Estate.Service.Public\Estate.Service.Public\WayToCol.Estate.Service.Public.xml</DocumentationFile>
+    <DocumentationFile>WayToCol.Estate.Service.Public.xml</DocumentationFile>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.8" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.1.0" />
@@ -32,13 +32,9 @@
     <PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
     <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
-    <PackageReference Include="WayToCol.Common.Api" Version="1.0.0" />
-    <PackageReference Include="WayToCol.Common.Contracts" Version="2019.12.17.106" />
-    <PackageReference Include="WayToCol.Common.MongoDbRepository" Version="2019.12.17.109" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\Nuget\WayToCol.Common.MongoDbRepository\WayToCol.Common.MongoDbRepository.csproj" />
+    <PackageReference Include="WayToCol.Common.Api" Version="2019.12.18.2140" />
+    <PackageReference Include="WayToCol.Common.Contracts" Version="2019.12.18.2140" />
+    <PackageReference Include="WayToCol.Common.MongoDbRepository" Version="2019.12.18.2140" />
   </ItemGroup>
 
 </Project>

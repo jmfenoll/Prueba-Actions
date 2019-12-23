@@ -3,6 +3,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -19,6 +20,7 @@ namespace WayToCol.Estate.Service.Public.Controllers
     /// 
     /// </summary>
     [ApiController]
+    [Authorize]
     public class EstateController : ControllerBase
     {
         private readonly ILogger<EstateController> _logger;
@@ -42,8 +44,8 @@ namespace WayToCol.Estate.Service.Public.Controllers
         /// <param name="pagesize">Items by page</param>
         /// <returns></returns>
         [HttpGet]
-        [Route("{page:int}/{pagesize:int}")]
-        public IActionResult Get(/*[fromquery]*/int page, int pagesize)
+        [Route("/")]
+        public IActionResult Get([FromQuery]int page, [FromQuery]int pagesize)
         {
             try
             {
@@ -61,34 +63,42 @@ namespace WayToCol.Estate.Service.Public.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Get");
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
 
         }
 
-        [HttpGet]
-        [Route("auth")]
-        public IActionResult Authenticate([FromQuery] string user, [FromQuery] string pass)
-        {
-            try
-            {
-                if (user == "123" && pass == "123")
-                {
-                    dynamic resp = new ExpandoObject();
-                    resp.token = Guid.NewGuid();
-                    resp.valid = DateTime.Now.AddDays(1);
-                    var strJson = JsonConvert.SerializeObject(resp);
-                    return StatusCode(StatusCodes.Status200OK, strJson);
-                }
-                else
-                    return StatusCode(StatusCodes.Status401Unauthorized);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <param name="user"></param>
+        ///// <param name="pass"></param>
+        ///// <returns></returns>
+        //[HttpGet]
+        //[Route("auth")]
+        //public IActionResult Authenticate([FromQuery] string user, [FromQuery] string pass)
+        //{
+        //    try
+        //    {
+        //        if (user == "123" && pass == "123")
+        //        {
+        //            dynamic resp = new ExpandoObject();
+        //            resp.token = Guid.NewGuid();
+        //            resp.valid = DateTime.Now.AddDays(1);
+        //            var strJson = JsonConvert.SerializeObject(resp);
+        //            return StatusCode(StatusCodes.Status200OK, strJson);
+        //        }
+        //        else
+        //            return StatusCode(StatusCodes.Status401Unauthorized);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Authenticate");
+        //        return StatusCode(StatusCodes.Status500InternalServerError);
+        //    }
 
-        }
+        //}
 
         /// <summary>
         /// Get id files from estate
@@ -128,7 +138,7 @@ namespace WayToCol.Estate.Service.Public.Controllers
         // https://docs.microsoft.com/es-es/aspnet/core/fundamentals/routing?view=aspnetcore-2.1#route-template-reference
         [HttpGet]
         [Route("{idestate}")]
-        public IActionResult GetEstate(string idestate)
+        public IActionResult GetEstate([FromRoute]string idestate)
         {
             try
             {
