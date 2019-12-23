@@ -31,8 +31,7 @@ Database: WayToCol
 Framework: .NET Core 2.1
 Desplegar como servicio de linux.
 
-Comandos:
-
+```bash
 dotnet restore -s \\172.16.201.90\w2c\Nuget
-
 dotnet publish
+```
