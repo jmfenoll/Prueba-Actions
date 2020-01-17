@@ -1,14 +1,15 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using System;
 using WayToCol.Estate.Service.Public.Repository;
 using WayToCol.EstateFile.Service.Public.Repository;
 
-namespace WayToCol.Estate.Service.Public
+namespace WayToCol.Estate.Service.Public.Extensions
 {
     /// <summary>
     /// 
     /// </summary>
-    public static class Extensions
+    public static class SetupExtensions
     {
         /// <summary>
         /// 
@@ -22,6 +23,7 @@ namespace WayToCol.Estate.Service.Public
             services.AddLogging(configure => configure.AddSerilog());
             return services;
         }
+
 
     }
 }

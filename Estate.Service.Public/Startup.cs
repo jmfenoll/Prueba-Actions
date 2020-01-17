@@ -1,5 +1,8 @@
 ﻿using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
+using Mapster;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +13,8 @@ using Swashbuckle.AspNetCore.Swagger;
 using WayToCol.Common.Api;
 using WayToCol.Common.Api.Swagger;
 using WayToCol.Common.Contracts.Estates;
+using WayToCol.Estate.Service.Public.Extensions;
+using WayToCol.EstateFile.Service.Public.Helpers;
 
 namespace WayToCol.Estate.Service.Public
 {
@@ -93,7 +98,13 @@ namespace WayToCol.Estate.Service.Public
         /// </summary>
         public void ConfigureMappings()
         {
-
+            TypeAdapterConfig<propiedadesPropiedadXml, EstateDto>
+                .NewConfig()
+                .Map(dest => dest.id, src => ImportHelper.GetMD5(src.id))
+                .TwoWays()
+                .Map(dest => dest.id_ficha, src => src.id);
         }
+
+
     }
 }

@@ -1,16 +1,16 @@
 ﻿using System;
-using System.Dynamic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Serilog;
-using WayToCol.Common.Contracts;
 using WayToCol.Common.Contracts.Estates;
+using WayToCol.Estate.Service.Public.Domain;
+using WayToCol.Estate.Service.Public.Extensions;
 using WayToCol.Estate.Service.Public.Repository;
 using WayToCol.EstateFile.Service.Public.Repository;
 
@@ -25,16 +25,18 @@ namespace WayToCol.Estate.Service.Public.Controllers
     {
         private readonly ILogger<EstateController> _logger;
         private readonly IEstatePublicRepository _rep;
+        private readonly IConfiguration _config;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="logger"></param>
         /// <param name="rep"></param>
-        public EstateController(ILogger<EstateController> logger, IEstatePublicRepository rep)
+        public EstateController(ILogger<EstateController> logger, IEstatePublicRepository rep, IConfiguration config)
         {
             _logger = logger;
             _rep = rep;
+            _config = config;
         }
 
         /// <summary>
@@ -48,6 +50,7 @@ namespace WayToCol.Estate.Service.Public.Controllers
         public IActionResult Get([FromQuery]int page, [FromQuery]int pagesize)
         {
             try
+
             {
 
                 // TODO: Que no devuelvan los nulos
@@ -154,6 +157,86 @@ namespace WayToCol.Estate.Service.Public.Controllers
             }
 
         }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="estateImport"></param>
+        /// <returns></returns>
+        [HttpPost("/")]
+        [Route("")]
+        public IActionResult SaveImportedEstate(propiedadesPropiedadXml estateImport)
+        {
+            // Autenticación  (Da problemas)
+            var dom = new EstateDomain();
+
+            // Mapeamos a Estate y a estateFiles
+            var estateDto = dom.Map(estateImport);
+            var estateFilesDto = dom.MapFiles(estateImport);
+
+            var respEstate = UpsertEstateAsync(estateDto);
+            var respFiles = UpsertFileAsync(estateFilesDto);
+
+            // Montamos lista de tareas
+            // Llamamos a Estate Private
+            // Llamamos a Estate File Private
+
+            var a = estateImport.accion;
+
+
+
+            //    try
+            //    {
+            //        // Esto va fuera, La extensión llamará al Public, el Public mapeará y lo pasará al Private ya mapeado.
+
+            //        EstateDto estateDto = Map(estateImport);
+            //        var resp = await _rep.UpsertAsync(estateDto);
+            //        if (!resp.IsAcknowledged)
+            //            throw new Exception("Error al hacer DeleteById" + estateDto.id);
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        Log.Error(ex, "Error al hacer Upsert de Estado");
+            //        return StatusCode(StatusCodes.Status500InternalServerError);
+            //    }
+            //    return StatusCode(StatusCodes.Status200OK);
+
+
+
+            //var client = new HttpProxy2Api();
+            //var url = new Uri(_urlSvcFileEstate).Append("");
+            //var response = await client.PutAsync(url.AbsoluteUri, file);
+            //return response;
+
+            /*try
+            {
+                var estate = _rep.Single(x => idestate == x.id);
+                if (estate == null)
+                    return StatusCode(StatusCodes.Status500InternalServerError);
+                return StatusCode(StatusCodes.Status200OK, estate);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al hacer Get FileEstate");
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }*/
+            return StatusCode(StatusCodes.Status200OK, a);
+        }
+
+        private object UpsertFileAsync(EstateFileDto[] estateFilesDto)
+        {
+            throw new NotImplementedException();
+        }
+
+        private async Task<HttpResponseMessage> UpsertEstateAsync(EstateDto estate)
+        {
+            var client = new HttpProxy2Api();
+            var url = new Uri(_config["privateServices:estate"]).Append("");
+            var response = await client.PutAsync(url.AbsoluteUri, estate);
+            return response;
+        }
+        
 
     }
 }
