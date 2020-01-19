@@ -11,10 +11,10 @@ using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization;
 using Swashbuckle.AspNetCore.Swagger;
 using WayToCol.Common.Api;
+using WayToCol.Common.Api.Helpers;
 using WayToCol.Common.Api.Swagger;
 using WayToCol.Common.Contracts.Estates;
 using WayToCol.Estate.Service.Public.Extensions;
-using WayToCol.EstateFile.Service.Public.Helpers;
 
 namespace WayToCol.Estate.Service.Public
 {
@@ -100,7 +100,7 @@ namespace WayToCol.Estate.Service.Public
         {
             TypeAdapterConfig<propiedadesPropiedadXml, EstateDto>
                 .NewConfig()
-                .Map(dest => dest.id, src => ImportHelper.GetMD5(src.id))
+                .Map(dest => dest.id, src => ModelHelper.GetMD5(src.id))
                 .TwoWays()
                 .Map(dest => dest.id_ficha, src => src.id);
         }

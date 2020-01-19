@@ -12,8 +12,8 @@
 using Mapster;
 using System;
 using System.Collections.Generic;
+using WayToCol.Common.Api.Helpers;
 using WayToCol.Common.Contracts.Estates;
-using WayToCol.EstateFile.Service.Public.Helpers;
 
 namespace WayToCol.Estate.Service.Public.Domain
 {
@@ -46,10 +46,10 @@ namespace WayToCol.Estate.Service.Public.Domain
                 var file = new EstateFileDto
                 {
                     url = photo.url,
-                    id = ImportHelper.GetMD5(estate.id + photo.prop),
-                    idEstate = ImportHelper.GetMD5(estate.id),
-                    name = ImportHelper.GetPhotoName(photo.url),
-                    mimeType = ImportHelper.GetMimeType(photo.url)
+                    id = ModelHelper.GetMD5(estate.id + photo.prop),
+                    idEstate = ModelHelper.GetMD5(estate.id),
+                    name = ModelHelper.GetPhotoName(photo.url),
+                    mimeType = ModelHelper.GetMimeType(photo.url)
                 };
                 listPhotos.Add(file);
             }

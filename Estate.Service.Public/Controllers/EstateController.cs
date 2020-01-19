@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -8,6 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using WayToCol.Common.Api.Extensions;
+using WayToCol.Common.Api.Helpers;
 using WayToCol.Common.Contracts.Estates;
 using WayToCol.Estate.Service.Public.Domain;
 using WayToCol.Estate.Service.Public.Extensions;
@@ -166,7 +170,7 @@ namespace WayToCol.Estate.Service.Public.Controllers
         /// <returns></returns>
         [HttpPost("/")]
         [Route("")]
-        public IActionResult SaveImportedEstate(propiedadesPropiedadXml estateImport)
+        public async Task<IActionResult> SaveImportedEstate(propiedadesPropiedadXml estateImport)
         {
             // Autenticación  (Da problemas)
             var dom = new EstateDomain();
@@ -175,15 +179,10 @@ namespace WayToCol.Estate.Service.Public.Controllers
             var estateDto = dom.Map(estateImport);
             var estateFilesDto = dom.MapFiles(estateImport);
 
-            var respEstate = UpsertEstateAsync(estateDto);
-            var respFiles = UpsertFileAsync(estateFilesDto);
-
-            // Montamos lista de tareas
-            // Llamamos a Estate Private
-            // Llamamos a Estate File Private
-
-            var a = estateImport.accion;
-
+            var response = UpsertEstateFileAsync(estateFilesDto);
+            var numPhotos = response.Count(x => x.Result.StatusCode==HttpStatusCode.OK);
+            estateDto.numfotos = numPhotos.ToString();
+            await UpsertEstateAsync(estateDto);
 
 
             //    try
@@ -221,22 +220,40 @@ namespace WayToCol.Estate.Service.Public.Controllers
                 Log.Error(ex, "Error al hacer Get FileEstate");
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }*/
-            return StatusCode(StatusCodes.Status200OK, a);
+            return StatusCode(StatusCodes.Status200OK);
         }
 
-        private object UpsertFileAsync(EstateFileDto[] estateFilesDto)
+        private List<Task<HttpResponseMessage>> UpsertEstateFileAsync(EstateFileDto[] estateFilesDto)
         {
-            throw new NotImplementedException();
+            int maxConcurrentTasks = Int32.Parse(_config["privateServices:max_concurrent_tasks"]);
+
+            maxConcurrentTasks = 1;
+            var queue=  new List<Task<HttpResponseMessage>>();
+            foreach (var file in estateFilesDto)
+            {
+                queue.Add(UpsertEstateFileAsync(file));
+                while (queue.Count(x => x.Status == TaskStatus.Running || x.Status == TaskStatus.WaitingForActivation) >= maxConcurrentTasks) { }
+            }
+            Task.WaitAll(queue.ToArray());
+            return queue;
         }
+
 
         private async Task<HttpResponseMessage> UpsertEstateAsync(EstateDto estate)
         {
             var client = new HttpProxy2Api();
-            var url = new Uri(_config["privateServices:estate"]).Append("");
+            var url = new Uri(_config["privateServices:estate"]);
             var response = await client.PutAsync(url.AbsoluteUri, estate);
             return response;
         }
-        
+        private async Task<HttpResponseMessage> UpsertEstateFileAsync(EstateFileDto estateFile)
+        {
+            var client = new HttpProxy2Api();
+            var url = new Uri(_config["privateServices:estateFile"]);
+            var response = await client.PutAsync(url.AbsoluteUri, estateFile);
+            return response;
+        }
+
 
     }
 }
