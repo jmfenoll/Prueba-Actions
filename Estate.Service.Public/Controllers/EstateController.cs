@@ -164,11 +164,11 @@ namespace WayToCol.Estate.Service.Public.Controllers
 
 
         /// <summary>
-        /// 
+        /// Used for import an Estate by Xml
         /// </summary>
         /// <param name="estateImport"></param>
         /// <returns></returns>
-        [HttpPost("/")]
+        [HttpPost]
         [Route("")]
         public async Task<IActionResult> SaveImportedEstate(propiedadesPropiedadXml estateImport)
         {
