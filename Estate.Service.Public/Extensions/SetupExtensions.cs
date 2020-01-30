@@ -2,7 +2,6 @@
 using Serilog;
 using System;
 using WayToCol.Estate.Service.Public.Repository;
-using WayToCol.EstateFile.Service.Public.Repository;
 
 namespace WayToCol.Estate.Service.Public.Extensions
 {

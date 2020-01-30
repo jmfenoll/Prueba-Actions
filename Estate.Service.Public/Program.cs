@@ -38,6 +38,7 @@ namespace WayToCol.Estate.Service.Public
 
             _hostingUrls = config.GetSection("server").GetValue<string>("urls");
 
+            Utils.Lucene.LuceneFactory.Initialize(config["lucene:path"]);
 
             CreateWebHostBuilder(args).Build().Run();
 
