@@ -83,7 +83,7 @@ namespace WayToCol.Estate.Service.Public.Controllers
         [Route("/Search")]
         public IActionResult Search([FromQuery]string term)
         {
-            var lucene = Utils.Lucene.LuceneFactory.GetInstance;
+            var lucene = Utils.Lucene.LuceneFactory.GetInstance(_config);
             var resp= lucene.Search(term, 10);
             return new JsonResult(resp);
 
