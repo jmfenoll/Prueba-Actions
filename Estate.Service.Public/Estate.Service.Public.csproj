@@ -24,7 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Mapster" Version="4.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.8" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.1" />
@@ -33,9 +32,9 @@
     <PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
     <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
-    <PackageReference Include="WayToCol.Common.Api" Version="2020.2.5.1852" />
-    <PackageReference Include="WayToCol.Common.Contracts" Version="2020.2.7.1945" />
-    <PackageReference Include="WayToCol.Common.MongoDbRepository" Version="2020.2.7.2013" />
+    <PackageReference Include="WayToCol.Common.Api" Version="2020.2.10.2307" />
+    <PackageReference Include="WayToCol.Common.Contracts" Version="2020.2.15.2005" />
+    <PackageReference Include="WayToCol.Common.MongoDbRepository" Version="2020.2.9.2052" />
     <PackageReference Include="WayToCol.Utils" Version="2020.2.2.2104" />
   </ItemGroup>
 

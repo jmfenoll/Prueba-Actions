@@ -2,7 +2,6 @@
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
-using Mapster;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -98,11 +97,11 @@ namespace WayToCol.Estate.Service.Public
         /// </summary>
         public void ConfigureMappings()
         {
-            TypeAdapterConfig<propiedadesPropiedadXml, EstateDto>
-                .NewConfig()
-                .Map(dest => dest.id, src => ModelHelper.GetMD5(src.id))
-                .TwoWays()
-                .Map(dest => dest.id_ficha, src => src.id);
+            //TypeAdapterConfig<propiedadesPropiedadXml, EstateDto>
+            //    .NewConfig()
+            //    .Map(dest => dest.id, src => ModelHelper.GetMD5(src.id))
+            //    .TwoWays()
+            //    .Map(dest => dest.id_ficha, src => src.id);
         }
 
 

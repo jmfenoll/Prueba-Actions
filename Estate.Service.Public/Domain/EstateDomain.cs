@@ -9,7 +9,6 @@
 //using WayToCol.Estate.Service.Public.Controllers;
 //using WayToCol.Estate.Service.Public.Repository;
 
-using Mapster;
 using System;
 using System.Collections.Generic;
 using WayToCol.Common.Api.Helpers;
@@ -24,7 +23,7 @@ namespace WayToCol.Estate.Service.Public.Domain
     {
         internal EstateDto Map(propiedadesPropiedadXml estateImport)
         {
-            var estate = estateImport.Adapt<EstateDto>();
+            var estate = new EstateImportedToDto(estateImport).ConvertToDto();
             return estate;
 
 

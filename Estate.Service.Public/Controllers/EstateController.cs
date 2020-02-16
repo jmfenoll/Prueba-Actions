@@ -49,18 +49,14 @@ namespace WayToCol.Estate.Service.Public.Controllers
         /// <param name="pagesize">Items by page</param>
         /// <returns></returns>
         [HttpGet]
-        [Route("/")]
-        public IActionResult Get([FromQuery]int page, [FromQuery]int pagesize)
+        [Route("")]
+        public IActionResult Get([FromQuery]int? page, [FromQuery]int? pagesize)
         {
             try
             {
-                // TODO: Que no devuelvan los nulos
-                // TODO: Los registros por página dónde se parametrizan?
                 // TODO: Habrá que paginar teniendo en cuenta el order de las columnas
                 //throw NotImplementedException();
-                var response = _rep.GetPaginated(page, pagesize);
-                response.Page = page;
-                response.Count = pagesize;
+                var response = _rep.GetPaginated(ref page, ref pagesize);
                 if (response.Data == null)
                     return StatusCode(StatusCodes.Status500InternalServerError);
                 return StatusCode(StatusCodes.Status200OK, response);
@@ -79,12 +75,14 @@ namespace WayToCol.Estate.Service.Public.Controllers
         /// <param name="page">Number of page</param>
         /// <param name="pagesize">Items by page</param>
         /// <returns></returns>
-        [HttpGet]
-        [Route("/Search")]
-        public IActionResult Search([FromQuery]string term)
+        [HttpGet("/search/{term}")]
+        public IActionResult Search(string term)
         {
             var lucene = Utils.Lucene.LuceneFactory.GetInstance(_config);
-            var resp= lucene.Search(term, 10);
+            var resPerPage = _config.GetValue<string>("Settings:ResultsPerPage");
+            if (string.IsNullOrEmpty(resPerPage)) resPerPage = "10";
+
+            var resp= lucene.Search(term, int.Parse(resPerPage));
             return new JsonResult(resp);
 
 
@@ -211,7 +209,7 @@ namespace WayToCol.Estate.Service.Public.Controllers
 
             var response = UpsertEstateFileAsync(estateFilesDto);
             var numPhotos = response.Count(x => x.Result.StatusCode==HttpStatusCode.OK);
-            estateDto.numfotos = numPhotos.ToString();
+            estateDto.numfotos = numPhotos;
             await UpsertEstateAsync(estateDto);
 
 
@@ -271,16 +269,17 @@ namespace WayToCol.Estate.Service.Public.Controllers
 
         private async Task<HttpResponseMessage> UpsertEstateAsync(EstateDto estate)
         {
-            var client = new HttpProxy2Api();
+            
             var url = new Uri(_config["privateServices:estate"]);
-            var response = await client.PutAsync(url.AbsoluteUri, estate);
+            var client = new HttpProxy2Api<EstateDto>(url.ToString());
+            var response = await client.PutAsync(estate);
             return response;
         }
         private async Task<HttpResponseMessage> UpsertEstateFileAsync(EstateFileDto estateFile)
         {
-            var client = new HttpProxy2Api();
             var url = new Uri(_config["privateServices:estateFile"]);
-            var response = await client.PutAsync(url.AbsoluteUri, estateFile);
+            var client = new HttpProxy2Api<EstateFileDto>(url.ToString());
+            var response = await client.PutAsync(estateFile);
             return response;
         }
 
