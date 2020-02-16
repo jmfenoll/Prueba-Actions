@@ -65,7 +65,7 @@ namespace WayToCol.Estate.Service.Public
 
                     // Si está en el mapeo
                     var mapping = _propertyMap.Where(x => x.propertyFrom == property.Name).FirstOrDefault();
-                    if (!mapping.Equals(default))
+                    if (!(mapping.converter == null && mapping.propertyFrom == null && mapping.propertyTo == null))
                     {
                         // Si el conversor es nulo, pasamos al siguiente
                         if (mapping.converter == null)

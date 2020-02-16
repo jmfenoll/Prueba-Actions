@@ -192,7 +192,7 @@ namespace WayToCol.Estate.Service.Public.Controllers
 
 
         /// <summary>
-        /// Used for import an Estate by Xml
+        /// Used for import an Estate by Chrome Extensioon
         /// </summary>
         /// <param name="estateImport"></param>
         /// <returns></returns>
