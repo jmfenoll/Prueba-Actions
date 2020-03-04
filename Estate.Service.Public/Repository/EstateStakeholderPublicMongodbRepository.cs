@@ -6,18 +6,18 @@ using WayToCol.Common.Contracts.Estates;
 using WayToCol.Common.Repository;
 
 
-namespace WayToCol.Estate.Service.Public.Repository
+namespace WayToCol.EstatStakeholder.Service.Public.Repository
 {
     /// <summary>
     /// 
     /// </summary>
-    public class EstateFilePublicMongoDbRepository : MongoDbPublicRepository<EstateFileDto, string>, IEstateFilePublicRepository
+    public class EstateStakeholderPublicMongoDbRepository : MongoDbPublicRepository<EstateStakeholderDto, string>
     {
         /// <summary>
         /// 
         /// </summary>
         /// <param name="config"></param>
-        public EstateFilePublicMongoDbRepository(IConfiguration config) : base(config, "Estate_Files")
+        public EstateStakeholderPublicMongoDbRepository(IConfiguration config) : base(config, "EstateStakeholder")
         {
         }
 
@@ -28,7 +28,7 @@ namespace WayToCol.Estate.Service.Public.Repository
         /// <returns></returns>
         public IEnumerable<String> GetByIdEstate(string idEstate)
         {
-            return this.All().Where(x => x.idEstate == idEstate).Select(x => x.id).ToList();
+            return this.All().Where(x => x.estateId == idEstate).Select(x => x.id).ToList();
         }
     }
 }

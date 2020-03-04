@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -27,19 +28,22 @@ namespace WayToCol.Estate.Service.Public.Controllers
     public class EstateController : ControllerBase
     {
         private readonly ILogger<EstateController> _logger;
-        private readonly IEstatePublicRepository _rep;
+        private readonly IEstatePublicRepository _repEstate;
         private readonly IConfiguration _config;
+        private readonly EstateDomain _estateDomain;
+
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="logger"></param>
         /// <param name="rep"></param>
-        public EstateController(ILogger<EstateController> logger, IEstatePublicRepository rep, IConfiguration config)
+        public EstateController(ILogger<EstateController> logger, IEstatePublicRepository rep, IConfiguration config, EstateDomain estateDomain)
         {
             _logger = logger;
-            _rep = rep;
+            _repEstate = rep;
             _config = config;
+            _estateDomain = estateDomain;
         }
 
         /// <summary>
@@ -56,7 +60,7 @@ namespace WayToCol.Estate.Service.Public.Controllers
             {
                 // TODO: Habrá que paginar teniendo en cuenta el order de las columnas
                 //throw NotImplementedException();
-                var response = _rep.GetPaginated(ref page, ref pagesize);
+                var response = _repEstate.GetPaginated(ref page, ref pagesize);
                 if (response.Data == null)
                     return StatusCode(StatusCodes.Status500InternalServerError);
                 return StatusCode(StatusCodes.Status200OK, response);
@@ -177,7 +181,8 @@ namespace WayToCol.Estate.Service.Public.Controllers
         {
             try
             {
-                var estate = _rep.Single(x => idestate == x.id);
+
+                var estate = _repEstate.Single(x => idestate == x.id);
                 if (estate == null)
                     return StatusCode(StatusCodes.Status500InternalServerError);
                 return StatusCode(StatusCodes.Status200OK, estate);
@@ -201,11 +206,10 @@ namespace WayToCol.Estate.Service.Public.Controllers
         public async Task<IActionResult> SaveImportedEstate(propiedadesPropiedadXml estateImport)
         {
             // Autenticación  (Da problemas)
-            var dom = new EstateDomain();
 
             // Mapeamos a Estate y a estateFiles
-            var estateDto = dom.Map(estateImport);
-            var estateFilesDto = dom.MapFiles(estateImport);
+            var estateDto = _estateDomain.Map(estateImport);
+            var estateFilesDto = _estateDomain.MapFiles(estateImport);
 
             var response = UpsertEstateFileAsync(estateFilesDto);
             var numPhotos = response.Count(x => x.Result.StatusCode==HttpStatusCode.OK);
@@ -284,5 +288,47 @@ namespace WayToCol.Estate.Service.Public.Controllers
         }
 
 
+        /// <summary>
+        /// Get list of agents that are subscripted to an estate (paginated)
+        /// </summary>
+        /// <remarks>
+        ///     POST /state/1a924a77b6a0d28fa24666eb0e1adcb5/stakeholder
+        ///     {
+        ///        "page": 1,
+        ///        "pagesize": 1,
+        ///     }
+        /// </remarks>
+        /// <param name="page">Number of page</param>
+        /// <param name="pagesize">Items by page</param>
+        /// <param name="estateId">Id of Estate</param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("/state/{estateId}/stakeholder")]
+        public IActionResult GetStakeHolder([FromQuery]int? page, [FromQuery]int? pagesize, string estateId)
+        {
+            try
+            {
+                // TODO: Habrá que paginar teniendo en cuenta el order de las columnas
+                var resp = _estateDomain.GetStakeholders(page, pagesize, estateId, HttpContext);
+                if (resp.Ok)
+                    return StatusCode(StatusCodes.Status200OK, resp.Content);
+                else
+                    return StatusCode(StatusCodes.Status403Forbidden);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Get");
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+
+        }
+
+
+
+
     }
+
+
+
+
 }

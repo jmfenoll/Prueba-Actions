@@ -10,7 +10,7 @@ namespace WayToCol.Estate.Service.Public.Repository
     /// <summary>
     /// 
     /// </summary>
-    public class EstatePublicMongoDbRepository : MongoDbPublicRepository<EstateDto>, IEstatePublicRepository
+    public class EstatePublicMongoDbRepository : MongoDbPublicRepository<EstateDto, string>, IEstatePublicRepository
     {
         /// <summary>
         /// 
@@ -37,8 +37,9 @@ namespace WayToCol.Estate.Service.Public.Repository
                 pag.Data = resp;
                 return pag;
 
-
         }
+
+
 
     }
 }
