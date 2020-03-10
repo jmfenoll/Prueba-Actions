@@ -73,7 +73,7 @@ namespace WayToCol.Estate.Service.Public.Domain
                 {
                     url = photo.url,
                     id = ModelHelper.GetMD5(estate.id + photo.prop),
-                    idEstate = ModelHelper.GetMD5(estate.id),
+                    estateId = ModelHelper.GetMD5(estate.id),
                     name = ModelHelper.GetPhotoName(photo.url),
                     mimeType = ModelHelper.GetMimeType(photo.url)
                 };
@@ -99,6 +99,31 @@ namespace WayToCol.Estate.Service.Public.Domain
             return resp;
         }
 
+        internal PaginationModel<EstateDto> Search(string term, int? page, int? pageSize)
+        {
+            
+
+            var lucene = Utils.Lucene.LuceneFactory.GetInstance(_config);
+            if (!pageSize.HasValue)
+            {
+                pageSize = _config.GetValue<int?>("Settings:ResultsPerPage") ?? 10;
+            };
+
+            var respLucene = lucene.SearchPaginated(term, page.Value, pageSize.Value);
+
+            var dataEstate = _repEstate.Find(respLucene.id);
+
+
+            var resp = new PaginationModel<EstateDto> {
+                totalItems = respLucene.total,
+                pageSize = pageSize.Value,
+                page=page.Value, 
+                data= dataEstate
+            };
+
+            return resp;
+        }
+
         internal  ServerResponse<PaginationModel<AgentDto>> GetStakeholders(int? page, int? pagesize, string estateId, HttpContext httpContext)
         {
             var resp = new ServerResponse<PaginationModel<AgentDto>>();
@@ -111,7 +136,7 @@ namespace WayToCol.Estate.Service.Public.Domain
             if (!agentsOfAgency.Contains(agentId))
             {
                 resp.AddErrorCode(StatusCodes.Status401Unauthorized,null);
-                return null;
+                return resp;
             }
 
             if (!page.HasValue) page = 1;
@@ -127,24 +152,17 @@ namespace WayToCol.Estate.Service.Public.Domain
             var pag = new PaginationModel<AgentDto> ();
 
 
-            var listSkateHolder= _repStakeholder
+            var listSkateHolder = _repStakeholder
                 .All()
-                .Where(sh => sh.estateId == estateId && sh.status== EstateStakeholderDto.enmStatus.accepted.ToString())
-                .Select(sh =>sh.agentId)
-                .AsEnumerable()
-                .Select(x=>new ObjectId(x))
+                .Where(sh => sh.estateId == estateId && sh.status == EstateStakeholderDto.enmStatus.accepted.ToString())
+                .Select(sh => sh.agentId)
                 .ToList();
 
             var listAgents = _repAgent.Find(listSkateHolder).Skip((page.Value - 1) * pagesize.Value).Take(pagesize.Value).ToList();
 
-            if (listAgents == null)
-                pag.TotalPages = 0;
-            else
-                pag.TotalPages = (int)Math.Ceiling(Convert.ToDecimal(listAgents.Count()) / pagesize.Value);
-
-            pag.Data = listAgents;
-            pag.Page = page.Value;
-            pag.Count = listAgents.Count;
+            pag.data = listAgents;
+            pag.page = page.Value;
+            pag.totalItems = listAgents.Count;
             //var a = _repAgent.All().ToList();
             //var b = _repAgent.All().Select(x => x.email).ToList();
             //var c = _repAgent.All().Where(x => listSkateHolder.Contains(x.id.ToString())).Select(x => x.email).ToList();

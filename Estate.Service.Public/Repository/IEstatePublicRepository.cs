@@ -15,7 +15,7 @@ namespace WayToCol.Estate.Service.Public.Repository
         /// <param name="page"></param>
         /// <param name="pagesize"></param>
         /// <returns></returns>
-        Common.Contracts.PaginationModel<EstateDto> GetPaginated(int page, int pagesize);
+        Common.Contracts.Responses.PaginationModel<EstateDto> GetPaginated(int page, int pagesize);
     }
 
 

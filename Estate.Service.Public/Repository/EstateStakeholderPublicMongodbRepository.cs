@@ -11,7 +11,7 @@ namespace WayToCol.EstatStakeholder.Service.Public.Repository
     /// <summary>
     /// 
     /// </summary>
-    public class EstateStakeholderPublicMongoDbRepository : MongoDbPublicRepository<EstateStakeholderDto, string>
+    public class EstateStakeholderPublicMongoDbRepository : MongoDbPublicRepository<EstateStakeholderDto>
     {
         /// <summary>
         /// 

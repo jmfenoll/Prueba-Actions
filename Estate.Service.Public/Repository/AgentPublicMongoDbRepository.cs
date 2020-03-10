@@ -14,7 +14,7 @@ namespace WayToCol.Agent.Service.Public.Repository
     /// <summary>
     /// 
     /// </summary>
-    public class AgentPublicMongoDbRepository : MongoDbPublicRepository<AgentDto, ObjectId>
+    public class AgentPublicMongoDbRepository : MongoDbPublicRepository<AgentDto>
     {
         /// <summary>
         /// 
@@ -26,7 +26,7 @@ namespace WayToCol.Agent.Service.Public.Repository
 
         internal List<string> GetIdByEstate(string agencyId)
         {
-            return this.All().Where(x => x.id_agency == agencyId).Select(x => x.id.ToString()).ToList();
+            return this.All().Where(x => x.agencyId == agencyId).Select(x => x.id.ToString()).ToList();
         }
     }
 }

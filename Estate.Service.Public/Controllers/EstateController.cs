@@ -14,6 +14,7 @@ using Serilog;
 using WayToCol.Common.Api.Extensions;
 using WayToCol.Common.Api.Helpers;
 using WayToCol.Common.Contracts.Estates;
+using WayToCol.Common.Contracts.Responses;
 using WayToCol.Estate.Service.Public.Domain;
 using WayToCol.Estate.Service.Public.Extensions;
 using WayToCol.Estate.Service.Public.Repository;
@@ -61,7 +62,7 @@ namespace WayToCol.Estate.Service.Public.Controllers
                 // TODO: Habrá que paginar teniendo en cuenta el order de las columnas
                 //throw NotImplementedException();
                 var response = _repEstate.GetPaginated(ref page, ref pagesize);
-                if (response.Data == null)
+                if (response.data == null)
                     return StatusCode(StatusCodes.Status500InternalServerError);
                 return StatusCode(StatusCodes.Status200OK, response);
             }
@@ -80,16 +81,11 @@ namespace WayToCol.Estate.Service.Public.Controllers
         /// <param name="pagesize">Items by page</param>
         /// <returns></returns>
         [HttpGet("/search/{term}")]
-        public IActionResult Search(string term)
+        public IActionResult Search(string term, int? page, int? pagesize)
         {
-            var lucene = Utils.Lucene.LuceneFactory.GetInstance(_config);
-            var resPerPage = _config.GetValue<string>("Settings:ResultsPerPage");
-            if (string.IsNullOrEmpty(resPerPage)) resPerPage = "10";
+            PaginationModel<EstateDto> resp = _estateDomain.Search(term, page, pagesize);
 
-            var resp= lucene.Search(term, int.Parse(resPerPage));
             return new JsonResult(resp);
-
-
             //try
             //{
                 

@@ -26,7 +26,7 @@ namespace WayToCol.Estate.Service.Public
         List<(string propertyFrom, string propertyTo, Func<object, propiedadesPropiedadXml, object> converter)> _propertyMap
             = new List<(string propertyFrom, string propertyTo, Func<object, propiedadesPropiedadXml, object> converter)>
         {
-                (nameof(propiedadesPropiedadXml.id), nameof(EstateDto.id_ficha), ToInt),
+                (nameof(propiedadesPropiedadXml.id), nameof(EstateDto.fichaId), ToInt),
                 (nameof(propiedadesPropiedadXml.numpanos), null, null),
                 (nameof(propiedadesPropiedadXml.altitud), nameof(EstateDto.longitud), ToDec),
                 (null, nameof(EstateDto.id),(value, obj)=>{ return ModelHelper.GetMD5(obj.id); }),

@@ -11,7 +11,7 @@ namespace WayToCol.Estate.Service.Public.Repository
     /// <summary>
     /// 
     /// </summary>
-    public class EstateFilePublicMongoDbRepository : MongoDbPublicRepository<EstateFileDto, string>, IEstateFilePublicRepository
+    public class EstateFilePublicMongoDbRepository : MongoDbPublicRepository<EstateFileDto>, IEstateFilePublicRepository
     {
         /// <summary>
         /// 
@@ -28,7 +28,7 @@ namespace WayToCol.Estate.Service.Public.Repository
         /// <returns></returns>
         public IEnumerable<String> GetByIdEstate(string idEstate)
         {
-            return this.All().Where(x => x.idEstate == idEstate).Select(x => x.id).ToList();
+            return this.All().Where(x => x.estateId == idEstate).Select(x => x.id).ToList();
         }
     }
 }
