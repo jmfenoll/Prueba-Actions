@@ -16,6 +16,7 @@ using WayToCol.Common.Api.Helpers;
 using WayToCol.Common.Contracts.Estates;
 using WayToCol.Common.Contracts.Responses;
 using WayToCol.Estate.Service.Public.Domain;
+using WayToCol.Estate.Service.Public.DTO;
 using WayToCol.Estate.Service.Public.Extensions;
 using WayToCol.Estate.Service.Public.Repository;
 
@@ -319,7 +320,59 @@ namespace WayToCol.Estate.Service.Public.Controllers
 
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost("publish/{id}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Publish([FromRoute] string id, [FromBody] EstatePublishCreateModel model)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(id))
+                    return BadRequest("id parameter is empty");
 
+                var result = await _repEstate.Publish(id, model);
+                if (result == null)
+                    return BadRequest("public version don't created");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "unexpected error on publish estate");
+                return BadRequest();
+            }
+
+            return Ok();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("publish/{id}")]
+        public async Task<IActionResult> GetPublish([FromRoute] string id)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(id))
+                    return BadRequest("id parameter is empty");
+
+                var result = await _repEstate.GetPublish(id);
+                if (result == null)
+                    return NotFound();
+
+                return Ok(result.Data);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexcepted error on get publish version");
+                return BadRequest("unexcepted error");
+            }
+        }
 
 
     }
