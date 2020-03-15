@@ -301,7 +301,6 @@ namespace WayToCol.Estate.Service.Public.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("/state/{estateId}/stakeholder")]
-        [AllowAnonymous]
         public IActionResult GetStakeHolder([FromQuery]int? page, [FromQuery]int? pagesize, string estateId)
         {
             try
@@ -354,6 +353,7 @@ namespace WayToCol.Estate.Service.Public.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("publish/{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetPublish([FromRoute] string id)
         {
             try
