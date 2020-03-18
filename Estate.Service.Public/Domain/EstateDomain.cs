@@ -34,6 +34,7 @@ namespace WayToCol.Estate.Service.Public.Domain
     /// </summary>
     public class EstateDomain
     {
+        private const int pageSizeDefault= 10;
         private ILogger<EstateController> _logger;
         private IEstatePublicRepository _repEstate;
         private IConfiguration _config;
@@ -101,18 +102,14 @@ namespace WayToCol.Estate.Service.Public.Domain
 
         internal PaginationModel<EstateDto> Search(string term, int? page, int? pageSize)
         {
-            
+            page = page ?? 1;
+            if (!pageSize.HasValue) pageSize = _config.GetValue<int?>("Settings:ResultsPerPage") ?? pageSizeDefault;
 
             var lucene = Utils.Lucene.LuceneFactory.GetInstance(_config);
-            if (!pageSize.HasValue)
-            {
-                pageSize = _config.GetValue<int?>("Settings:ResultsPerPage") ?? 10;
-            };
-
+            
             var respLucene = lucene.SearchPaginated(term, page.Value, pageSize.Value);
 
             var dataEstate = _repEstate.Find(respLucene.id);
-
 
             var resp = new PaginationModel<EstateDto> {
                 totalItems = respLucene.total,
@@ -124,13 +121,16 @@ namespace WayToCol.Estate.Service.Public.Domain
             return resp;
         }
 
-        internal  ServerResponse<PaginationModel<AgentDto>> GetStakeholders(int? page, int? pagesize, string estateId, HttpContext httpContext)
+        internal  ServerResponse<PaginationModel<AgentDto>> GetStakeholders(int? page, int? pageSize, string estateId, HttpContext httpContext)
         {
+            page = page ?? 1;
+            if (!pageSize.HasValue) pageSize = _config.GetValue<int?>("Settings:ResultsPerPage") ?? pageSizeDefault;
+
             var resp = new ServerResponse<PaginationModel<AgentDto>>();
             // TODO JMF: No podemos sacar el usuario activo
             var agentId = GetCurrentUser(httpContext);
             agentId = "5e5eba00c461710b68902d0d";
-
+             
             var estate = _repEstate.Single(x => x.id == estateId);
             var agentsOfAgency = _repAgent.GetIdByEstate(estate.agencyId);
             if (!agentsOfAgency.Contains(agentId))
@@ -139,16 +139,6 @@ namespace WayToCol.Estate.Service.Public.Domain
                 return resp;
             }
 
-            if (!page.HasValue) page = 1;
-
-            if (!pagesize.HasValue)
-            {
-                var resPerPage = _config.GetSection("Settings:ResultsPerPage").Value;
-                if (resPerPage == null)
-                    pagesize = 20;
-                else
-                    pagesize = int.Parse(resPerPage);
-            }
             var pag = new PaginationModel<AgentDto> ();
 
 
@@ -158,7 +148,7 @@ namespace WayToCol.Estate.Service.Public.Domain
                 .Select(sh => sh.agentId)
                 .ToList();
 
-            var listAgents = _repAgent.Find(listSkateHolder).Skip((page.Value - 1) * pagesize.Value).Take(pagesize.Value).ToList();
+            var listAgents = _repAgent.Find(listSkateHolder).Skip((page.Value - 1) * pageSize.Value).Take(pageSize.Value).ToList();
 
             pag.data = listAgents;
             pag.page = page.Value;

@@ -181,7 +181,7 @@ namespace WayToCol.Estate.Service.Public.Controllers
 
                 var estate = _repEstate.Single(x => idestate == x.id);
                 if (estate == null)
-                    return StatusCode(StatusCodes.Status500InternalServerError);
+                    return BadRequest();
                 return StatusCode(StatusCodes.Status200OK, estate);
             }
             catch (Exception ex)
@@ -249,7 +249,7 @@ namespace WayToCol.Estate.Service.Public.Controllers
                 Log.Error(ex, "Error al hacer Get FileEstate");
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }*/
-            return StatusCode(StatusCodes.Status200OK);
+            return Ok();
         }
 
         private List<Task<HttpResponseMessage>> UpsertEstateFileAsync(EstateFileDto[] estateFilesDto)
@@ -308,9 +308,9 @@ namespace WayToCol.Estate.Service.Public.Controllers
                 // TODO: Habrá que paginar teniendo en cuenta el order de las columnas
                 var resp = _estateDomain.GetStakeholders(page, pagesize, estateId, HttpContext);
                 if (resp.Ok)
-                    return StatusCode(StatusCodes.Status200OK, resp.Content);
+                    return Ok(resp.Content);
                 else
-                    return StatusCode(StatusCodes.Status403Forbidden);
+                    return BadRequest();
             }
             catch (Exception ex)
             {
