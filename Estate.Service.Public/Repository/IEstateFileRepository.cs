@@ -9,7 +9,7 @@ namespace WayToCol.Estate.Service.Public.Repository
     /// <summary>
     /// 
     /// </summary>
-    public interface IEstateFilePublicRepository : IPublicRepository<EstateFileDto>
+    public interface IEstateFileRepository : IRepository<EstateFileDto>
     {
         /// <summary>
         /// 

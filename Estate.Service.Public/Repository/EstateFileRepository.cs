@@ -6,18 +6,18 @@ using WayToCol.Common.Contracts.Estates;
 using WayToCol.Common.Repository;
 
 
-namespace WayToCol.EstatStakeholder.Service.Public.Repository
+namespace WayToCol.Estate.Service.Public.Repository
 {
     /// <summary>
     /// 
     /// </summary>
-    public class EstateStakeholderPublicMongoDbRepository : MongoDbPublicRepository<EstateStakeholderDto>
+    public class EstateFileMongoDbRepository : MongoDbRepository<EstateFileDto>, IEstateFileRepository
     {
         /// <summary>
         /// 
         /// </summary>
         /// <param name="config"></param>
-        public EstateStakeholderPublicMongoDbRepository(IConfiguration config) : base(config, "EstateStakeholder")
+        public EstateFileMongoDbRepository(IConfiguration config) : base(config, "Estate_Files")
         {
         }
 

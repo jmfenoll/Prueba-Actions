@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using WayToCol.Common.Api.Helpers;
 using WayToCol.Common.Contracts.Estates;
+using WayToCol.Common.Contracts.Estates.Import;
+using WayToCol.Common.MongoDbRepository.Helpers;
 
 namespace WayToCol.Estate.Service.Public
 {
@@ -29,7 +31,7 @@ namespace WayToCol.Estate.Service.Public
                 (nameof(propiedadesPropiedadXml.id), nameof(EstateDto.fichaId), ToInt),
                 (nameof(propiedadesPropiedadXml.numpanos), null, null),
                 (nameof(propiedadesPropiedadXml.altitud), nameof(EstateDto.longitud), ToDec),
-                (null, nameof(EstateDto.id),(value, obj)=>{ return ModelHelper.GetMD5(obj.id); }),
+                (null, nameof(EstateDto.id),(value, obj)=>{ return DataHelper.GetMd5(obj.id); }),
         };
 
 

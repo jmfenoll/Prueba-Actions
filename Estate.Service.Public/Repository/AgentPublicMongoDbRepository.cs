@@ -14,13 +14,13 @@ namespace WayToCol.Agent.Service.Public.Repository
     /// <summary>
     /// 
     /// </summary>
-    public class AgentPublicMongoDbRepository : MongoDbPublicRepository<AgentDto>
+    public class AgentMongoDbRepository : MongoDbRepository<AgentDto>
     {
         /// <summary>
         /// 
         /// </summary>
         /// <param name="config"></param>
-        public AgentPublicMongoDbRepository(IConfiguration config) : base(config, "Agents")
+        public AgentMongoDbRepository(IConfiguration config) : base(config, "Agents")
         {
         }
 

@@ -14,11 +14,14 @@ using Serilog;
 using WayToCol.Common.Api.Extensions;
 using WayToCol.Common.Api.Helpers;
 using WayToCol.Common.Contracts.Estates;
+using WayToCol.Common.Contracts.Estates.Import;
 using WayToCol.Common.Contracts.Responses;
 using WayToCol.Estate.Service.Public.Domain;
 using WayToCol.Estate.Service.Public.DTO;
 using WayToCol.Estate.Service.Public.Extensions;
 using WayToCol.Estate.Service.Public.Repository;
+using WayToCol.EstateFile.Service.Public.Controllers;
+using WayToCol.EstatStakeholder.Service.Public.Repository;
 
 namespace WayToCol.Estate.Service.Public.Controllers
 {
@@ -27,12 +30,14 @@ namespace WayToCol.Estate.Service.Public.Controllers
     /// </summary>
     [ApiController]
     [Authorize]
-    public class EstateController : ControllerBase
+    public class EstateController: WayToColControllerBase
     {
         private readonly ILogger<EstateController> _logger;
-        private readonly IEstatePublicRepository _repEstate;
+        private readonly IEstateRepository _repEstate;
+        private readonly IEstateFileRepository _repEstateFile;
         private readonly IConfiguration _config;
         private readonly EstateDomain _estateDomain;
+        private readonly IEstateStakeholderRepository _repStakeholder;
 
 
         /// <summary>
@@ -40,12 +45,15 @@ namespace WayToCol.Estate.Service.Public.Controllers
         /// </summary>
         /// <param name="logger"></param>
         /// <param name="rep"></param>
-        public EstateController(ILogger<EstateController> logger, IEstatePublicRepository rep, IConfiguration config, EstateDomain estateDomain)
+        public EstateController(ILogger<EstateController> logger, IEstateRepository rep, IConfiguration config, EstateDomain estateDomain, IEstateStakeholderRepository repStakeholder, IEstateFileRepository repEstateFile)
         {
             _logger = logger;
             _repEstate = rep;
             _config = config;
             _estateDomain = estateDomain;
+            _repStakeholder = repStakeholder;
+            _repEstateFile = repEstateFile;
+
         }
 
         /// <summary>
@@ -148,7 +156,7 @@ namespace WayToCol.Estate.Service.Public.Controllers
         {
             try
             {
-                var _repFile = (IEstateFilePublicRepository) HttpContext.RequestServices.GetService(typeof(IEstateFilePublicRepository));
+                var _repFile = (IEstateFileRepository) HttpContext.RequestServices.GetService(typeof(IEstateFileRepository));
 
                 var listFiles= _repFile.GetByIdEstate(idestate);
                 if (listFiles == null || listFiles.Count()==0)
@@ -305,8 +313,9 @@ namespace WayToCol.Estate.Service.Public.Controllers
         {
             try
             {
+                var connectedAgentId = GetCurrentUserIdFromContext();
                 // TODO: Habrá que paginar teniendo en cuenta el order de las columnas
-                var resp = _estateDomain.GetStakeholders(page, pagesize, estateId, HttpContext);
+                var resp = _estateDomain.GetStakeholders(page, pagesize, estateId, connectedAgentId);
                 if (resp.Ok)
                     return Ok(resp.Content);
                 else
@@ -373,6 +382,130 @@ namespace WayToCol.Estate.Service.Public.Controllers
                 return BadRequest("unexcepted error");
             }
         }
+
+        /// <summary>
+        /// Share an estate to an agent
+        /// </summary>
+        /// <param name="estate"></param>
+        /// <returns></returns>
+        [HttpPost("/estate/{estateId}/shareto")]
+
+        public async Task<IActionResult> ShareTo(string estateId, [FromBody] string[] agents)
+        {
+            try
+            {
+                await _estateDomain.ShareTo(estateId, agents);
+
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al compartir Estate");
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+            return StatusCode(StatusCodes.Status200OK);
+        }
+
+        /// <summary>
+        /// Accept an estate shared 
+        /// </summary>
+        /// <param name="estateId"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        [HttpGet("{estateId}/shareto/confirm/{token}")]
+
+        public async Task<IActionResult> Confirm(string estateId, string token)
+        {
+            try
+            {
+                var resp = await _estateDomain.ConfirmAsync(estateId, token, _repStakeholder);
+                if (resp.Ok)
+                {
+                    return Redirect(_config.GetValue<string>("LandingPageShared"));
+                }
+                else
+                    return StatusCode(resp.GetErrorCodes[0].code, resp.GetErrorCodes[0].description);
+
+            }
+            catch (ApplicationException ex)
+            {
+                Log.Error(ex, "Error al confirmar Estate compartido");
+                return StatusCode(StatusCodes.Status400BadRequest);
+
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al confirmar Estate compartido");
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+            return StatusCode(StatusCodes.Status200OK);
+        }
+
+        [HttpDelete("estate/{estateId}/stakeholder/{stakeholderId}")]
+        public async Task<IActionResult> DeleteStakeholder(string estateId, string stakeholderId)
+        {
+            try
+            {
+                var currentAgentId = GetCurrentUserIdFromContext();
+                var resp = _estateDomain.DeleteStakeholder(HttpContext, estateId, stakeholderId, currentAgentId);
+                if (resp.Ok)
+                    return StatusCode(StatusCodes.Status200OK);
+                else
+                    return StatusCode(resp.GetErrorCodes[0].code);
+
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al borrar un colaborador de Inmueble");
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+
+        }
+
+        ///// <summary>
+        ///// Create a new Estate
+        ///// </summary>
+        ///// <param name="estate"></param>
+        ///// <returns></returns>
+        //[HttpPost("")]
+        //public async Task<IActionResult> Insert(EstateDto estate)
+        //{
+        //    try
+        //    {
+        //        await _repEstate.InsertAsync(estate);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Log.Error(ex, "Error al hacer Insert de Estate");
+        //        return StatusCode(StatusCodes.Status500InternalServerError);
+        //    }
+        //    return StatusCode(StatusCodes.Status200OK);
+        //}
+
+        ///// <summary>
+        ///// Update an estate
+        ///// </summary>
+        ///// <param name="estate"></param>
+        ///// <returns></returns>
+        //[HttpPut("")]
+        //public async Task<IActionResult> Update(EstateDto estate)
+        //{
+        //    try
+        //    {
+        //        var resp = await _repEstate.UpdateAsync(estate);
+        //        if (!resp.IsAcknowledged)
+        //            throw new Exception("Error al hacer Update");
+        //        if (resp.MatchedCount == 0)
+        //            return StatusCode(StatusCodes.Status204NoContent);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Log.Error(ex, "Error al hacer Upsert de estate");
+        //        return StatusCode(StatusCodes.Status500InternalServerError);
+        //    }
+        //    return StatusCode(StatusCodes.Status200OK);
+        //}
+
+
 
 
     }
