@@ -2,10 +2,11 @@
 using Serilog;
 using System;
 using System.Linq;
-using WayToCol.Agent.Service.Public.Repository;
+using WayToCol.Agent.Service.Repository;
 using WayToCol.Common.Contracts.Estates;
 using WayToCol.Estate.Service.Public.Domain;
 using WayToCol.Estate.Service.Public.Repository;
+using WayToCol.EstateFile.Service.Repository;
 using WayToCol.EstatStakeholder.Service.Public.Repository;
 
 namespace WayToCol.Estate.Service.Public.Extensions
@@ -24,12 +25,14 @@ namespace WayToCol.Estate.Service.Public.Extensions
         {
             services.AddTransient<IEstateRepository, EstateMongoDbRepository>();
             services.AddTransient<IEstateFileRepository, EstateFileMongoDbRepository>();
-            services.AddTransient<AgentMongoDbRepository, AgentMongoDbRepository>();
-            services.AddTransient<EstateStakeholderMongoDbRepository, EstateStakeholderMongoDbRepository>();
+            services.AddTransient<IAgentRepository, AgentMongoDbRepository>();
+            services.AddTransient<IEstateStakeholderRepository, EstateStakeholderMongoDbRepository>();
+            services.AddTransient<ITokenRepository, TokenRepository>();
             services.AddTransient<EstateDomain, EstateDomain>();
             services.AddLogging(configure => configure.AddSerilog());
             return services;
         }
+
 
         public static string addTxt(this string texto, string nuevoTexto)
         {

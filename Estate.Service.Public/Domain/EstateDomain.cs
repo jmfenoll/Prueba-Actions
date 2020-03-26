@@ -13,16 +13,18 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using WayToCol.Agent.Service.Public.Repository;
+using WayToCol.Agent.Service.Repository;
 using WayToCol.Common.Api.Helpers;
 using WayToCol.Common.Contracts;
 using WayToCol.Common.Contracts.Agents;
@@ -32,6 +34,7 @@ using WayToCol.Common.Contracts.Responses;
 using WayToCol.Common.MongoDbRepository.Helpers;
 using WayToCol.Estate.Service.Public.Controllers;
 using WayToCol.Estate.Service.Public.Repository;
+using WayToCol.EstateFile.Service.Repository;
 using WayToCol.EstatStakeholder.Service.Public.Repository;
 
 namespace WayToCol.Estate.Service.Public.Domain
@@ -43,18 +46,26 @@ namespace WayToCol.Estate.Service.Public.Domain
     {
         private const int pageSizeDefault= 10;
         private ILogger<EstateController> _logger;
-        private IEstateRepository _repEstate;
+        private IEstateRepository _estateRep;
         private IConfiguration _config;
-        private EstateStakeholderMongoDbRepository _repStakeholder;
-        private AgentMongoDbRepository _repAgent;
+        private IEstateStakeholderRepository _stakeholderRep;
+        private IAgentRepository _agentRep;
+        private ITokenRepository _tokenRep;
 
-        public EstateDomain(ILogger<EstateController> logger, IEstateRepository rep, IConfiguration config, EstateStakeholderMongoDbRepository repstakeHolder, AgentMongoDbRepository repAgent)
+        public EstateDomain(
+            ILogger<EstateController> logger, 
+            IEstateRepository estateRep, 
+            IConfiguration config, 
+            IEstateStakeholderRepository stakeHolderRep, 
+            IAgentRepository agentRep,
+            ITokenRepository tokenRep)
         {
             _logger = logger;
-            _repEstate = rep;
+            _estateRep = estateRep;
             _config = config;
-            _repStakeholder = repstakeHolder;
-            _repAgent = repAgent;
+            _stakeholderRep = stakeHolderRep;
+            _agentRep = agentRep;
+            _tokenRep = tokenRep;
         }
 
 
@@ -116,7 +127,7 @@ namespace WayToCol.Estate.Service.Public.Domain
             
             var respLucene = lucene.SearchPaginated(term, page.Value, pageSize.Value);
 
-            var dataEstate = _repEstate.Find(respLucene.id);
+            var dataEstate = _estateRep.Find(respLucene.id);
 
             var resp = new PaginationModel<EstateDto> {
                 totalItems = respLucene.total,
@@ -135,8 +146,8 @@ namespace WayToCol.Estate.Service.Public.Domain
 
             var resp = new ServerResponse<PaginationModel<AgentDto>>();
              
-            var estate = _repEstate.Single(x => x.id == estateId);
-            var agentsOfAgency = _repAgent.GetIdByEstate(estate.agencyId);
+            var estate = _estateRep.Single(x => x.id == estateId);
+            var agentsOfAgency = _agentRep.GetIdByEstate(estate.agencyId);
             if (!agentsOfAgency.Contains(agentId))
             {
                 resp.AddErrorCode(StatusCodes.Status401Unauthorized,null);
@@ -146,13 +157,13 @@ namespace WayToCol.Estate.Service.Public.Domain
             var pag = new PaginationModel<AgentDto> ();
 
 
-            var listSkateHolder = _repStakeholder
+            var listSkateHolder = _stakeholderRep
                 .All()
                 .Where(sh => sh.estateId == estateId && sh.status == EstateStakeholderDto.enmStatus.accepted.ToString())
                 .Select(sh => sh.agentId)
                 .ToList();
 
-            var listAgents = _repAgent.Find(listSkateHolder).Skip((page.Value - 1) * pageSize.Value).Take(pageSize.Value).ToList();
+            var listAgents = _agentRep.Find(listSkateHolder).Skip((page.Value - 1) * pageSize.Value).Take(pageSize.Value).ToList();
 
             pag.data = listAgents;
             pag.page = page.Value;
@@ -233,120 +244,100 @@ namespace WayToCol.Estate.Service.Public.Domain
         internal ServerResponse DeleteStakeholder(HttpContext httpContext, string estateId, string stakeholderId, string currentAgentId)
         {
             var resp = new ServerResponse();
-            var estate = _repEstate.Single(x => x.id == estateId);
+            var estate = _estateRep.Single(x => x.id == estateId);
             // TODO JMF: No deberíamos de hacer esto
-            var agentsOfAgency = _repAgent.GetIdByEstate(estate.agencyId);
+            var agentsOfAgency = _agentRep.GetIdByEstate(estate.agencyId);
             if (!agentsOfAgency.Contains(currentAgentId))
             {
                 resp.AddErrorCode(StatusCodes.Status401Unauthorized, null);
                 return resp;
             }
-            _repStakeholder.DeleteAgent(stakeholderId);
+            _stakeholderRep.DeleteAgent(stakeholderId);
             return resp;
         }
 
-        internal async Task ShareTo(string estateId, string[] agents)
+        internal async Task<ServerResponse> ShareTo(string estateId, string[] agentsId, string currentAgentId)
         {
-            var skateHoldersDb = _repStakeholder.All().Where(x => x.estateId == estateId && agents.Contains(x.agentId)).ToList();
+            var resp = new ServerResponse();
+            // Verify that AgentConnected belongs to Agency
+            var estate = await _estateRep.GetByIdAsync(estateId);
+            var agentInEstate = _agentRep.Count(x => x.id == currentAgentId && x.agencyId == estate.agencyId);
+            if (agentInEstate == 0)
+                resp.AddError("The connected agent can't share an estate that doesn't belong to other agency");
 
-            foreach (var agent in agents)
+            if (resp.Ok)
             {
-                var stakeHolder = new EstateStakeholderDto();
+                // Get all the stakeholders in the array
+                var skateHoldersDb = _stakeholderRep.All().Where(x => x.estateId == estateId && agentsId.Contains(x.agentId)).ToList();
 
-                var existSkateHolder = skateHoldersDb.Where(x => x.agentId == agent && x.estateId == estateId).FirstOrDefault();
-                if (existSkateHolder == null)
+                foreach (var agentId in agentsId)
                 {
-                    stakeHolder = new EstateStakeholderDto()
+                    var respEachAgent = new ServerResponse();
+
+                    dynamic data = new ExpandoObject();
+                    data.estateId = estateId;
+                    data.estateId = agentId;
+
+                    var respToken = await _tokenRep.GetTokenAsync(data, new TimeSpan(1,0,0,0));
+
+                    var stakeHolder = new EstateStakeholderDto();
+
+                    if (!respToken.Ok)
                     {
-                        id = DataHelper.GetMd5(estateId + agent),
-                        agentId = agent,
-                        estateId = estateId,
-                        createDate = DateTime.Now,
-                        updateDate = DateTime.Now,
-                        status = EstateStakeholderDto.enmStatus.pending.ToString()
-                    };
-                    await _repStakeholder.InsertAsync(stakeHolder);
-                }
-                else
-                {
-                    existSkateHolder.updateDate = DateTime.Now;
-                    existSkateHolder.status = EstateStakeholderDto.enmStatus.pending.ToString();
-                    existSkateHolder.canceledDate = null;
-                    existSkateHolder.acceptedDate = null;
-                    await _repStakeholder.UpdateAsync(existSkateHolder);
-                    stakeHolder = existSkateHolder;
-                }
+                        resp.AddResponse(respToken);
+                        continue;
 
-                var token = await GetEstakeHolderTokenAsync(stakeHolder.estateId, stakeHolder.agentId);
-                var urlEstate = _config.GetValue<string>("UrlEstatePublic");
-                var body = $@"Hola.</br>
+                    }
+                    var token = respToken.Content;
+                    
+                    var existSkateHolder = skateHoldersDb.Where(x => x.agentId == agentId && x.estateId == estateId).FirstOrDefault();
+                    if (existSkateHolder == null)
+                    {
+                        // Si no existe lo inserta
+                        stakeHolder = new EstateStakeholderDto()
+                        {
+                            id = DataHelper.GetMd5(estateId + agentId),
+                            agentId = agentId,
+                            estateId = estateId,
+                            createDate = DateTime.Now,
+                            updateDate = DateTime.Now,
+                            status = EstateStakeholderDto.enmStatus.pending.ToString()
+                        };
+                        await _stakeholderRep.InsertAsync(stakeHolder);
+                    }
+                    else
+                    {
+                        // Si existe lo actualiza
+
+                        existSkateHolder.updateDate = DateTime.Now;
+                        existSkateHolder.status = EstateStakeholderDto.enmStatus.pending.ToString();
+                        existSkateHolder.canceledDate = null;
+                        existSkateHolder.acceptedDate = null;
+                        await _stakeholderRep.UpdateAsync(existSkateHolder);
+                        stakeHolder = existSkateHolder;
+                    }
+
+                    var mail = new Mail.SenderMail(_config);
+                    var agent = _agentRep.GetById(agentId);
+                    
+                    var urlEstate = _config.GetValue<string>("UrlServices:EstateService");
+                    var body = $@"Hola, {agent.name}.</br>
 Te están compartiendo un inmueble.</br>
 Pincha en <a href={urlEstate}{stakeHolder.estateId}/shareto/confirm/{token}>este enlace </a> para aceptarlo.";
-                //a href=https://devapi.waytocol.com/state/-987/shareto/confirm/29dce7b3-51fe-4a86-b166-c37157ddd71a
-                SendEmail("jmfenoll@gmail.com", "Enlace de WayToCol", body);
-                Serilog.Log.Information(body);
-            }
+                    //a href=https://devapi.waytocol.com/state/-987/shareto/confirm/29dce7b3-51fe-4a86-b166-c37157ddd71a
 
-        }
+                    await mail.SendMailToConfirm(agent.email, "[Waytocol] Nuevo inmueble compartido", body, "");
+                    Serilog.Log.Information(body);
 
-        private void SendEmail(string to, string subject, string body)
-        {
-            using (SmtpClient smtp = new SmtpClient())
-            {
-                smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
-                smtp.UseDefaultCredentials = false;
-                smtp.EnableSsl = true;
-                smtp.Host = "smtp.gmail.com";
-                smtp.Port = 587;
-                smtp.Credentials = new NetworkCredential("jmfenoll@gmail.com", "XXXXX");
-
-                string from = "sharing@waytocol.com";
-                MailMessage message = new MailMessage(from, to);
-                message.Subject = subject;
-                message.Body = body;
-                // Credentials are necessary if the server requires the client 
-                // to authenticate before it will send email on the client's behalf.
-
-                try
-                {
-                    smtp.Send(message);
+                    resp.AddResponse(respEachAgent);
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Exception caught in CreateTestMessage2(): {0}",
-                        ex.ToString());
-                }
-
             }
+            return resp;
         }
 
-        private async Task<string> GetEstakeHolderTokenAsync(string estateId, string agentId)
-        {
-            var obj = new
-            {
-                estateId = estateId,
-                agentId = agentId
-            };
-            //var jsonObj = Newtonsoft.Json.JsonConvert.SerializeObject(obj);
 
-            var _urlToken = _config.GetValue<string>("UrlToken");
-            if (_urlToken == null)
-                throw new ApplicationException("No existe la variable 'UrlToken' en el AppSettings");
 
-            var client = new RestClient(_urlToken);
-            var req = new RestRequest(Method.POST);
-            //req.RequestFormat = DataFormat.Json;
-            req.AddHeader("content-type", "text/plain");
-            req.AddJsonBody(obj);
-            var resp = await client.ExecuteAsync(req);
-            if (resp.StatusCode != HttpStatusCode.OK)
-            {
-                throw new ApplicationException("No se ha podido descargar el token");
-            }
 
-            dynamic respDyn = JObject.Parse(resp.Content);
-            return respDyn.id;
-        }
 
     }
 }

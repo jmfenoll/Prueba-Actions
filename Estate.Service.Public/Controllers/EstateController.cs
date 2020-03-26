@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using WayToCol.Agent.Service.Repository;
 using WayToCol.Common.Api.Extensions;
 using WayToCol.Common.Api.Helpers;
 using WayToCol.Common.Contracts.Estates;
@@ -45,15 +46,15 @@ namespace WayToCol.Estate.Service.Public.Controllers
         /// </summary>
         /// <param name="logger"></param>
         /// <param name="rep"></param>
-        public EstateController(ILogger<EstateController> logger, IEstateRepository rep, IConfiguration config, EstateDomain estateDomain, IEstateStakeholderRepository repStakeholder, IEstateFileRepository repEstateFile)
+        public EstateController(ILogger<EstateController> logger, IEstateRepository rep, IConfiguration config, EstateDomain estateDomain, IEstateStakeholderRepository stakeholderRep, IEstateFileRepository estateFileRep, IAgentRepository agentRep) 
+            :base(config, agentRep)
         {
             _logger = logger;
             _repEstate = rep;
             _config = config;
             _estateDomain = estateDomain;
-            _repStakeholder = repStakeholder;
-            _repEstateFile = repEstateFile;
-
+            _repStakeholder = stakeholderRep;
+            _repEstateFile = estateFileRep;
         }
 
         /// <summary>
@@ -308,7 +309,7 @@ namespace WayToCol.Estate.Service.Public.Controllers
         /// <param name="estateId">Id of Estate</param>
         /// <returns></returns>
         [HttpGet]
-        [Route("/state/{estateId}/stakeholder")]
+        [Route("/estate/{estateId}/stakeholder")]
         public IActionResult GetStakeHolder([FromQuery]int? page, [FromQuery]int? pagesize, string estateId)
         {
             try
@@ -394,7 +395,12 @@ namespace WayToCol.Estate.Service.Public.Controllers
         {
             try
             {
-                await _estateDomain.ShareTo(estateId, agents);
+                var currentAgent = GetCurrentAgentIdFromContext();
+                var resp= await _estateDomain.ShareTo(estateId, agents, currentAgent);
+                if (resp.Ok)
+                    return Ok();
+                else
+                    return BadRequest(resp.ToString());
 
             }
             catch (Exception ex)
@@ -404,6 +410,8 @@ namespace WayToCol.Estate.Service.Public.Controllers
             }
             return StatusCode(StatusCodes.Status200OK);
         }
+
+
 
         /// <summary>
         /// Accept an estate shared 

@@ -9,12 +9,12 @@ using WayToCol.Common.Contracts;
 using WayToCol.Common.Contracts.Agents;
 using WayToCol.Common.Repository;
 
-namespace WayToCol.Agent.Service.Public.Repository
+namespace WayToCol.Agent.Service.Repository
 {
     /// <summary>
     /// 
     /// </summary>
-    public class AgentMongoDbRepository : MongoDbRepository<AgentDto>
+    public class AgentMongoDbRepository : MongoDbRepository<AgentDto>, IAgentRepository
     {
         /// <summary>
         /// 
@@ -24,9 +24,14 @@ namespace WayToCol.Agent.Service.Public.Repository
         {
         }
 
-        internal List<string> GetIdByEstate(string agencyId)
+        public List<string> GetIdByEstate(string agencyId)
         {
             return this.All().Where(x => x.agencyId == agencyId).Select(x => x.id.ToString()).ToList();
+        }
+
+        public string GetAgentByUserId(string currentUserId)
+        {
+            return this.Single(x => x.userId == currentUserId).id;
         }
     }
 }
